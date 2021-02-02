@@ -11,11 +11,13 @@ from service.user_service import UserService
 # 清理控制台
 import os
 import sys
+from service.news_service import NewService
 
 sys.setrecursionlimit(1000000)  # 例如这里设置为一百万
 import time
 
 __user_service = UserService()
+__news_service = NewService()
 while True:
     os.system("cls")
     print(Fore.LIGHTBLUE_EX, "\n\t====================")
@@ -54,7 +56,67 @@ while True:
                             print(Style.RESET_ALL)
                             opt = input("\n\t请输入操作编号:")
                             if opt == "1":
-                                pass
+                                page = 1
+                                while True:
+                                    os.system("cls")
+                                    count_page = __news_service.search_unreview_count_page()
+                                    result = __news_service.search_unreview_list(page)
+                                    for index in range(len(result)):
+                                        one = result[index]
+                                        print(Fore.LIGHTGREEN_EX,
+                                              "\n\t%d\t%s\t%s\t%s" % (index + 1, one[1], one[2], one[3]))
+                                    print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                                    print(Fore.LIGHTBLUE_EX, "\n\t%d/%d" % (page, count_page))
+                                    print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                                    print(Fore.LIGHTRED_EX, "\n\tback、返回上一层")
+                                    print(Fore.LIGHTRED_EX, "\n\tprev、上一页")
+                                    print(Fore.LIGHTRED_EX, "\n\tnext、下一页")
+                                    print(Style.RESET_ALL)
+                                    opt = input("\n\t请输入操作编号:")
+                                    if opt == "back":
+                                        break
+                                    elif opt == "prev" and page > 1:
+                                        page -= 1
+                                    elif opt == "next" and page < count_page:
+                                        page += 1
+                                    elif 1 <= int(opt) <= 5:
+                                        news_id = result[int(opt) - 1][0]
+                                        __news_service.update_unreview_news(news_id)
+
+                            elif opt == "2":
+                                    page = 1
+                                    while True:
+                                        os.system("cls")
+                                        count_page = __news_service.search_count_page()
+                                        result = __news_service.search_list(page)
+                                        for index in range(len(result)):
+                                            one = result[index]
+                                            print(Fore.LIGHTGREEN_EX,
+                                                  "\n\t%d\t%s\t%s\t%s" % (index + 1, one[1], one[2], one[3]))
+                                        print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                                        print(Fore.LIGHTBLUE_EX, "\n\t%d/%d" % (page, count_page))
+                                        print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                                        print(Fore.LIGHTRED_EX, "\n\tback、返回上一层")
+                                        print(Fore.LIGHTRED_EX, "\n\tprev、上一页")
+                                        print(Fore.LIGHTRED_EX, "\n\tnext、下一页")
+                                        print(Style.RESET_ALL)
+                                        opt = input("\n\t请输入操作编号:")
+                                        if opt == "back":
+                                            break
+                                        elif opt == "prev" and page > 1:
+                                            page -= 1
+                                        elif opt == "next" and page < count_page:
+                                            page += 1
+                                        elif 1 <= int(opt) <= 5:
+                                            news_id = result[int(opt) - 1][0]
+                                            __news_service.delete_by_id(news_id)
+
+
+
+
+
+
+
 
 
 
