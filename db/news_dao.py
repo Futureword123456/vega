@@ -112,9 +112,12 @@ class NewsDao(object):
             con.commit()
         except Exception as e:
             if "con" in dir():
-                con.rollback(0)
+                con.rollback()
             print(e)
 
         finally:
             if "con" in dir():
                 con.close()
+
+
+
