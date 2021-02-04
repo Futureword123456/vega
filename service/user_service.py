@@ -47,3 +47,9 @@ class UserService(object):
 
     def delete_by_id(self, id):
         self.__user_dao.delete_by_id(id)
+
+        """查询用户id"""
+
+    def search_useid(self, username):
+        userid = self.__user_dao.search_useid(username)
+        return userid

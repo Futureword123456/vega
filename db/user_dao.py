@@ -136,3 +136,17 @@ class UserDao:
         finally:
             if "con" in dir():
                 con.close()
+        """查询用户id"""
+    def search_useid(self,username):
+        try:
+            con = pool.get_connection()
+            cur = con.cursor()
+            sql = "select id from t_user where username = %s"
+            cur.execute(sql, [username])
+            count_page = cur.fetchone()[0]
+            return count_page
+        except Exception as e:
+            print(e)
+        finally:
+            if "con" in dir():
+                con.close()

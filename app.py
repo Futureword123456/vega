@@ -9,6 +9,7 @@ from colorama import Fore, Back, Style
 from getpass import getpass
 from service.user_service import UserService
 from service.role_sevice import RoleService
+from service.type_service import TypeService
 # 清理控制台
 import os
 import sys
@@ -20,6 +21,7 @@ import time
 __user_service = UserService()
 __news_service = NewService()
 __role_service = RoleService()
+__type_service = TypeService()
 
 while True:
     os.system("cls")
@@ -43,7 +45,85 @@ while True:
             while True:
                 os.system("cls")
                 if role == "新闻编辑":
-                    print("test")
+                    print(Fore.LIGHTGREEN_EX, "\n\t1、发表新闻")
+                    print(Fore.LIGHTGREEN_EX, "\n\t2、编辑新闻")
+                    print(Fore.LIGHTRED_EX, "\n\tback、退出登录")
+                    print(Fore.LIGHTRED_EX, "\n\texit、退出系统")
+                    print(Style.RESET_ALL)
+                    opt = input("\n\t请输入操作编号:")
+                    if opt == "1":
+                        os.system("cls")
+                        title = input("\n\t新闻标题")
+                        userid = __user_service.search_useid(username)
+                        result = __type_service.search_list()
+                        for index in range(len(result)):
+                            one = result[index]
+                            print(Fore.LIGHTBLUE_EX, "\n\t%d.%s" % (index + 1, one[1]))
+                        print(Style.RESET_ALL)
+                        opt = input("\n\t类型编号:")
+                        type_id = result[int(opt) - 1][0]
+                        # todo 新闻正文
+                        content_id = 100
+                        is_top = input("\n\tt置顶级别(0-5)")
+                        is_commite = input("\n\t是否提交(Y/y):")
+                        if is_commite == "Y" or is_commite == "y":
+                            __news_service.insert(title, userid, type_id, content_id, is_top)
+                            print("\n\t保存成功(3秒后自动返回)")
+                            time.sleep(3)
+                    elif opt == "2":
+                        page = 1
+                        while True:
+                            os.system("cls")
+                            count_page = __news_service.search_count_page()
+                            result = __news_service.search_list(page)
+                            for index in range(len(result)):
+                                one = result[index]
+                                print(Fore.LIGHTGREEN_EX,
+                                      "\n\t%d\t%s\t%s\t%s" % (index + 1, one[1], one[2], one[3]))
+                            print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                            print(Fore.LIGHTBLUE_EX, "\n\t%d/%d" % (page, count_page))
+                            print(Fore.LIGHTBLUE_EX, "\n\t-----------------")
+                            print(Fore.LIGHTRED_EX, "\n\tback、返回上一层")
+                            print(Fore.LIGHTRED_EX, "\n\tprev、上一页")
+                            print(Fore.LIGHTRED_EX, "\n\tnext、下一页")
+                            print(Style.RESET_ALL)
+                            opt = input("\n\t请输入操作编号:")
+                            if opt == "back":
+                                break
+                            elif opt == "prev" and page > 1:
+                                page -= 1
+                            elif opt == "next" and page < count_page:
+                                page += 1
+                            elif 1 <= int(opt) <= 5:
+                                news_id = result[int(opt) - 1][0]
+                                result = __news_service.search_id(news_id)
+                                title = result[0]
+                                type = result[1]
+                                is_top = result[2]
+                                print("\n\t新闻原标题:%s" % (title))
+                                new_title = input("\n\t新标题:")
+                                print("\n\t新闻原类型:%s" % (type))
+                                result = __type_service.search_list()
+                                for index in range(len(result)):
+                                    one = result[index]
+                                    print(Fore.LIGHTBLUE_EX, "\n\t%d.%s" % (index + 1, one[1]))
+                                print(Style.RESET_ALL)
+                                opt = input("\n\t类型编号:")
+                                type_id = result[int(opt) - 1][0]
+                                # todo input news's content
+                                content_id = 100
+                                print("\n\t置顶级别:%s" % (is_top))
+                                new_is_top = input("\n\t置顶级别(0-5):")
+                                is_commite = input("\n\t是否提交？(Y/y):")
+                                if is_commite == "Y" or is_commite == 'y':
+                                    __news_service.update(news_id, new_title, type_id, content_id, new_is_top)
+                                    print("\n\t保存成功(3秒后自动返回)")
+                                    time.sleep(3)
+                    elif opt == "back":
+                        break
+                    elif opt == "exit":
+                        sys.exit(0)
+
                 elif role == "管理员":
                     print(Fore.LIGHTGREEN_EX, "\n\t1、新闻管理")
                     print(Fore.LIGHTGREEN_EX, "\n\t2、用户管理")
@@ -86,6 +166,18 @@ while True:
                                     elif 1 <= int(opt) <= 5:
                                         news_id = result[int(opt) - 1][0]
                                         __news_service.update_unreview_news(news_id)
+                                        result = __news_service.search_catch(news_id)
+                                        title = result[0]
+                                        username = result[1]
+                                        type = result[2]
+                                        content_id = result[3]
+                                        # 查找新闻
+                                        content = 100
+                                        is_top = result[4]
+                                        create_time = str(result[5])
+                                        """保存到redis数据"""
+                                        __news_service.cache_news(news_id, title, username, type,
+                                                                  content, is_top, create_time)
                                     elif opt == "back":
                                         break
 
@@ -116,6 +208,7 @@ while True:
                                     elif 1 <= int(opt) <= 5:
                                         news_id = result[int(opt) - 1][0]
                                         __news_service.delete_by_id(news_id)
+                                        __news_service.delete_cache(news_id)
                             elif opt == "back":
                                 break
                     elif opt == "2":

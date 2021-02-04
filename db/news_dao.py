@@ -119,5 +119,78 @@ class NewsDao(object):
             if "con" in dir():
                 con.close()
 
+    """添加新闻"""
 
+    def insert(self, title, editor_id, type_id, content_id, is_top):
+        try:
+            con = pool.get_connection()
+            con.start_transaction()
+            cur = con.cursor()
+            sql = "insert into t_news (title,editor_id,type_id,content_id,is_top,state) " \
+                  "values (%s,%s,%s,%s,%s,%s)"
+            cur.execute(sql, (title, editor_id, type_id, content_id, is_top, "待审批"))
+            con.commit()
+        except Exception as e:
+            if "con" in dir():
+                con.rollback()
+            print(e)
 
+        finally:
+            if "con" in dir():
+                con.close()
+
+    """"查找用于缓存的记录"""
+
+    def search_catch(self, id):
+        try:
+            con = pool.get_connection()
+            cur = con.cursor()
+            sql = "select n.title,u.username,tt.type,n.content_id,n.is_top,n.create_time from t_news n join t_type tt " \
+                  "on n.type_id = tt.id " \
+                  "join t_user u on n.editor_id=u.id " \
+                  "where n.id =%s"
+            cur.execute(sql, [id])
+            result = cur.fetchone()
+            return result
+        except Exception as e:
+            print(e)
+        finally:
+            if "con" in dir():
+                con.close()
+
+    """根据id查询"""
+
+    def search_id(self, id):
+        try:
+            con = pool.get_connection()
+            cur = con.cursor()
+            sql = "select n.title,tt.type,n.is_top " \
+                  "from t_news n " \
+                  "join t_type tt on n.type_id = tt.id " \
+                  "where n.id =%s"
+            cur.execute(sql, [id])
+            result = cur.fetchone()
+            return result
+        except Exception as e:
+            print(e)
+        finally:
+            if "con" in dir():
+                con.close()
+        """更改新闻"""
+    def update(self, id, title, type_id, content_id, is_top):
+        try:
+            con = pool.get_connection()
+            con.start_transaction()
+            cur = con.cursor()
+            sql = "update t_news set title=%s,type_id=%s,content_id=%s,is_top=%s,state=%s,update_time=NOW() where " \
+                  "id=%s "
+            cur.execute(sql, (title, type_id, content_id, is_top, "待审批", id))
+            con.commit()
+        except Exception as e:
+            if "con" in dir():
+                con.rollback()
+            print(e)
+
+        finally:
+            if "con" in dir():
+                con.close()
