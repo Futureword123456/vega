@@ -4,7 +4,7 @@
 # @Email : 2635681517@qq.com
 # @File : type_service.py
 
-from db.type_dao import TypeDao
+from dao.type_dao import TypeDao
 
 
 class TypeService(object):

@@ -3,7 +3,7 @@
 # @Author : yang
 # @Email : 2635681517@qq.com
 # @File : user_service.py
-from db.user_dao import UserDao
+from dao.user_dao import UserDao
 
 
 class UserService(object):

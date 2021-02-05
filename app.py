@@ -10,6 +10,7 @@ from getpass import getpass
 from service.user_service import UserService
 from service.role_sevice import RoleService
 from service.type_service import TypeService
+
 # 清理控制台
 import os
 import sys
@@ -63,11 +64,14 @@ while True:
                         opt = input("\n\t类型编号:")
                         type_id = result[int(opt) - 1][0]
                         # todo 新闻正文
-                        content_id = 100
+                        path = input("\n\t输入文件的地址")
+                        file = open(path, "r", encoding='utf-8')
+                        content = file.read()
+
                         is_top = input("\n\tt置顶级别(0-5)")
                         is_commite = input("\n\t是否提交(Y/y):")
                         if is_commite == "Y" or is_commite == "y":
-                            __news_service.insert(title, userid, type_id, content_id, is_top)
+                            __news_service.insert(title, userid, type_id, content, is_top)
                             print("\n\t保存成功(3秒后自动返回)")
                             time.sleep(3)
                     elif opt == "2":
@@ -95,14 +99,15 @@ while True:
                             elif opt == "next" and page < count_page:
                                 page += 1
                             elif 1 <= int(opt) <= 5:
+                                os.system("cls")
                                 news_id = result[int(opt) - 1][0]
                                 result = __news_service.search_id(news_id)
                                 title = result[0]
                                 type = result[1]
                                 is_top = result[2]
-                                print("\n\t新闻原标题:%s" % (title))
+                                print("\n\t新闻原标题:%s" % title)
                                 new_title = input("\n\t新标题:")
-                                print("\n\t新闻原类型:%s" % (type))
+                                print("\n\t新闻原类型:%s" % type)
                                 result = __type_service.search_list()
                                 for index in range(len(result)):
                                     one = result[index]
@@ -110,20 +115,21 @@ while True:
                                 print(Style.RESET_ALL)
                                 opt = input("\n\t类型编号:")
                                 type_id = result[int(opt) - 1][0]
-                                # todo input news's content
-                                content_id = 100
-                                print("\n\t置顶级别:%s" % (is_top))
+                                path = input("\n\t输入内容路径:")
+                                file = open(path, "r", encoding='utf-8')
+                                content = file.read()
+                                file.close()
+                                print("\n\t置顶级别:%s" % is_top)
                                 new_is_top = input("\n\t置顶级别(0-5):")
                                 is_commite = input("\n\t是否提交？(Y/y):")
                                 if is_commite == "Y" or is_commite == 'y':
-                                    __news_service.update(news_id, new_title, type_id, content_id, new_is_top)
+                                    __news_service.update(news_id, new_title, type_id, content, new_is_top)
                                     print("\n\t保存成功(3秒后自动返回)")
                                     time.sleep(3)
                     elif opt == "back":
                         break
                     elif opt == "exit":
                         sys.exit(0)
-
                 elif role == "管理员":
                     print(Fore.LIGHTGREEN_EX, "\n\t1、新闻管理")
                     print(Fore.LIGHTGREEN_EX, "\n\t2、用户管理")
@@ -171,8 +177,8 @@ while True:
                                         username = result[1]
                                         type = result[2]
                                         content_id = result[3]
-                                        # 查找新闻
-                                        content = 100
+                                        # todo 查找新闻
+                                        content = __news_service.search_content_by_id(content_id)
                                         is_top = result[4]
                                         create_time = str(result[5])
                                         """保存到redis数据"""
